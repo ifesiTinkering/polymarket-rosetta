@@ -15,6 +15,18 @@ def lambda_handler(event, context):
     Expected query parameter: path (e.g., /events/23246)
     """
 
+    # Handle OPTIONS requests for CORS preflight
+    if event.get('requestContext', {}).get('http', {}).get('method') == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
+            },
+            'body': ''
+        }
+
     try:
         # Get the path from query parameters
         query_params = event.get('queryStringParameters', {})
@@ -94,16 +106,3 @@ def lambda_handler(event, context):
                 'error': f'Internal server error: {str(e)}'
             })
         }
-
-
-# For OPTIONS requests (CORS preflight)
-def handle_options(event, context):
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
-        },
-        'body': ''
-    }
