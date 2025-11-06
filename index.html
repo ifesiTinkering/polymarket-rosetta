@@ -341,11 +341,10 @@
 
     <script>
         const BASE_URL = 'https://gamma-api.polymarket.com';
-        // Use CORS proxy to avoid cross-origin issues on GitHub Pages
-        const CORS_PROXY = 'https://corsproxy.io/?';
 
+        // Use AllOrigins CORS proxy for GitHub Pages
         function proxyUrl(url) {
-            return CORS_PROXY + encodeURIComponent(url);
+            return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
         }
 
         // Tab switching
