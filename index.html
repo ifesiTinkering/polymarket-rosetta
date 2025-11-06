@@ -341,6 +341,12 @@
 
     <script>
         const BASE_URL = 'https://gamma-api.polymarket.com';
+        // Use CORS proxy to avoid cross-origin issues on GitHub Pages
+        const CORS_PROXY = 'https://corsproxy.io/?';
+
+        function proxyUrl(url) {
+            return CORS_PROXY + encodeURIComponent(url);
+        }
 
         // Tab switching
         document.querySelectorAll('.tab').forEach(tab => {
@@ -362,47 +368,54 @@
 
         // API fetch functions
         async function fetchEventBySlug(slug) {
-            const response = await fetch(`${BASE_URL}/events?slug=${slug}`);
+            const url = `${BASE_URL}/events?slug=${slug}`;
+            const response = await fetch(proxyUrl(url));
             if (!response.ok) throw new Error('Failed to fetch event');
             const data = await response.json();
             return data.length > 0 ? data[0] : null;
         }
 
         async function fetchEventById(id) {
-            const response = await fetch(`${BASE_URL}/events/${id}`);
+            const url = `${BASE_URL}/events/${id}`;
+            const response = await fetch(proxyUrl(url));
             if (!response.ok) throw new Error('Failed to fetch event');
             return await response.json();
         }
 
         async function fetchMarketBySlug(slug) {
-            const response = await fetch(`${BASE_URL}/markets?slug=${slug}`);
+            const url = `${BASE_URL}/markets?slug=${slug}`;
+            const response = await fetch(proxyUrl(url));
             if (!response.ok) throw new Error('Failed to fetch market');
             const data = await response.json();
             return data.length > 0 ? data[0] : null;
         }
 
         async function fetchMarketById(id) {
-            const response = await fetch(`${BASE_URL}/markets/${id}`);
+            const url = `${BASE_URL}/markets/${id}`;
+            const response = await fetch(proxyUrl(url));
             if (!response.ok) throw new Error('Failed to fetch market');
             return await response.json();
         }
 
         async function fetchMarketByQuestionId(id) {
-            const response = await fetch(`${BASE_URL}/markets?question_ids=${id}`);
+            const url = `${BASE_URL}/markets?question_ids=${id}`;
+            const response = await fetch(proxyUrl(url));
             if (!response.ok) throw new Error('Failed to fetch market');
             const data = await response.json();
             return data.length > 0 ? data[0] : null;
         }
 
         async function fetchMarketByConditionId(id) {
-            const response = await fetch(`${BASE_URL}/markets?condition_ids=${id}`);
+            const url = `${BASE_URL}/markets?condition_ids=${id}`;
+            const response = await fetch(proxyUrl(url));
             if (!response.ok) throw new Error('Failed to fetch market');
             const data = await response.json();
             return data.length > 0 ? data[0] : null;
         }
 
         async function fetchMarketByTokenId(id) {
-            const response = await fetch(`${BASE_URL}/markets?clob_token_ids=${id}`);
+            const url = `${BASE_URL}/markets?clob_token_ids=${id}`;
+            const response = await fetch(proxyUrl(url));
             if (!response.ok) throw new Error('Failed to fetch market');
             const data = await response.json();
             return data.length > 0 ? data[0] : null;
