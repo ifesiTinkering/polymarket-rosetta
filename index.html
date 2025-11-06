@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polymarket ID Lookup Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .lookup-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            color: #374151;
+        }
+
+        .tab:hover {
+            background: #e5e7eb;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-section {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .result-item {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .result-value {
+            color: #111827;
+            word-break: break-all;
+        }
+
+        .market-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .market-card h4 {
+            color: #111827;
+            margin-bottom: 10px;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .example {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                width: 100%;
+            }
+
+            .result-item {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Polymarket ID Lookup Tool</h1>
+            <p>Convert between different Polymarket identifiers: slugs, market IDs, condition IDs, question IDs, and token IDs</p>
+        </div>
+
+        <div class="lookup-section">
+            <div class="tabs">
+                <button class="tab active" data-tab="event-slug">Event Slug</button>
+                <button class="tab" data-tab="event-id">Event ID</button>
+                <button class="tab" data-tab="market-slug">Market Slug</button>
+                <button class="tab" data-tab="market-id">Market ID</button>
+                <button class="tab" data-tab="question-id">Question ID</button>
+                <button class="tab" data-tab="condition-id">Condition ID</button>
+                <button class="tab" data-tab="token-id">Token ID</button>
+            </div>
+
+            <!-- Event Slug -->
+            <div class="tab-content active" data-content="event-slug">
+                <div class="input-group">
+                    <label>Event Slug</label>
+                    <input type="text" id="event-slug-input" placeholder="e.g., new-york-city-mayoral-election">
+                    <div class="example">Example: new-york-city-mayoral-election</div>
+                </div>
+                <button class="btn" onclick="lookupEventSlug()">Lookup</button>
+            </div>
+
+            <!-- Event ID -->
+            <div class="tab-content" data-content="event-id">
+                <div class="input-group">
+                    <label>Event ID</label>
+                    <input type="text" id="event-id-input" placeholder="e.g., 26507">
+                    <div class="example">Example: 26507</div>
+                </div>
+                <button class="btn" onclick="lookupEventId()">Lookup</button>
+            </div>
+
+            <!-- Market Slug -->
+            <div class="tab-content" data-content="market-slug">
+                <div class="input-group">
+                    <label>Market Slug</label>
+                    <input type="text" id="market-slug-input" placeholder="e.g., will-steve-sweeney-win...">
+                    <div class="example">Example: will-steve-sweeney-win-the-new-jersey-governor-election-in-2025</div>
+                </div>
+                <button class="btn" onclick="lookupMarketSlug()">Lookup</button>
+            </div>
+
+            <!-- Market ID -->
+            <div class="tab-content" data-content="market-id">
+                <div class="input-group">
+                    <label>Market ID</label>
+                    <input type="text" id="market-id-input" placeholder="e.g., 551142">
+                    <div class="example">Example: 551142</div>
+                </div>
+                <button class="btn" onclick="lookupMarketId()">Lookup</button>
+            </div>
+
+            <!-- Question ID -->
+            <div class="tab-content" data-content="question-id">
+                <div class="input-group">
+                    <label>Question ID</label>
+                    <input type="text" id="question-id-input" placeholder="e.g., 0x5ddb6cc9...">
+                    <div class="example">Example: 0x5ddb6cc9bcce2d9d810ef66a6ee394f91ecf28b7caa4e405036af1916b26e805</div>
+                </div>
+                <button class="btn" onclick="lookupQuestionId()">Lookup</button>
+            </div>
+
+            <!-- Condition ID -->
+            <div class="tab-content" data-content="condition-id">
+                <div class="input-group">
+                    <label>Condition ID</label>
+                    <input type="text" id="condition-id-input" placeholder="e.g., 0x201df9b6...">
+                    <div class="example">Example: 0x201df9b6a68bab220392ca4cd18cf4d8c96b7612568777626292d2fb08954efe</div>
+                </div>
+                <button class="btn" onclick="lookupConditionId()">Lookup</button>
+            </div>
+
+            <!-- Token ID -->
+            <div class="tab-content" data-content="token-id">
+                <div class="input-group">
+                    <label>Token ID</label>
+                    <input type="text" id="token-id-input" placeholder="e.g., 16867679388416061053995436140492438650416184687930130083732571696309100575009">
+                    <div class="example">Example: 16867679388416061053995436140492438650416184687930130083732571696309100575009</div>
+                </div>
+                <button class="btn" onclick="lookupTokenId()">Lookup</button>
+            </div>
+
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://gamma-api.polymarket.com';
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+
+                // Update active tab
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Update active content
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.querySelector(`[data-content="${tabName}"]`).classList.add('active');
+
+                // Clear results
+                document.getElementById('results').classList.remove('show');
+            });
+        });
+
+        // API fetch functions
+        async function fetchEventBySlug(slug) {
+            const response = await fetch(`${BASE_URL}/events?slug=${slug}`);
+            if (!response.ok) throw new Error('Failed to fetch event');
+            const data = await response.json();
+            return data.length > 0 ? data[0] : null;
+        }
+
+        async function fetchEventById(id) {
+            const response = await fetch(`${BASE_URL}/events/${id}`);
+            if (!response.ok) throw new Error('Failed to fetch event');
+            return await response.json();
+        }
+
+        async function fetchMarketBySlug(slug) {
+            const response = await fetch(`${BASE_URL}/markets?slug=${slug}`);
+            if (!response.ok) throw new Error('Failed to fetch market');
+            const data = await response.json();
+            return data.length > 0 ? data[0] : null;
+        }
+
+        async function fetchMarketById(id) {
+            const response = await fetch(`${BASE_URL}/markets/${id}`);
+            if (!response.ok) throw new Error('Failed to fetch market');
+            return await response.json();
+        }
+
+        async function fetchMarketByQuestionId(id) {
+            const response = await fetch(`${BASE_URL}/markets?question_ids=${id}`);
+            if (!response.ok) throw new Error('Failed to fetch market');
+            const data = await response.json();
+            return data.length > 0 ? data[0] : null;
+        }
+
+        async function fetchMarketByConditionId(id) {
+            const response = await fetch(`${BASE_URL}/markets?condition_ids=${id}`);
+            if (!response.ok) throw new Error('Failed to fetch market');
+            const data = await response.json();
+            return data.length > 0 ? data[0] : null;
+        }
+
+        async function fetchMarketByTokenId(id) {
+            const response = await fetch(`${BASE_URL}/markets?clob_token_ids=${id}`);
+            if (!response.ok) throw new Error('Failed to fetch market');
+            const data = await response.json();
+            return data.length > 0 ? data[0] : null;
+        }
+
+        // Display functions
+        function showLoading() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading...</p></div>';
+            results.classList.add('show');
+        }
+
+        function showError(message) {
+            const results = document.getElementById('results');
+            results.innerHTML = `<div class="error">Error: ${message}</div>`;
+            results.classList.add('show');
+        }
+
+        function displayEventInfo(event) {
+            const markets = event.markets || [];
+            const activeMarkets = markets.filter(m => m.active);
+
+            let html = `
+                <div class="result-section">
+                    <h3>Event Information</h3>
+                    <div class="result-item">
+                        <div class="result-label">Event ID:</div>
+                        <div class="result-value">${event.id || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Event Slug:</div>
+                        <div class="result-value">${event.slug || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Event Title:</div>
+                        <div class="result-value">${event.title || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">NegRisk Market ID:</div>
+                        <div class="result-value">${event.negRiskMarketID || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Is NegRisk:</div>
+                        <div class="result-value">${event.negRisk || false}</div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <h3>Markets (${activeMarkets.length} active, ${markets.length} total)</h3>
+                    ${activeMarkets.map((market, idx) => {
+                        const tokenIds = JSON.parse(market.clobTokenIds || '[]');
+                        return `
+                            <div class="market-card">
+                                <h4>${idx + 1}. ${market.groupItemTitle || 'Unknown'}</h4>
+                                <div class="result-item">
+                                    <div class="result-label">Market ID:</div>
+                                    <div class="result-value">${market.id || 'N/A'}</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-label">Market Slug:</div>
+                                    <div class="result-value">${market.slug || 'N/A'}</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-label">Question:</div>
+                                    <div class="result-value">${market.question || 'N/A'}</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-label">Condition ID:</div>
+                                    <div class="result-value">${market.conditionId || 'N/A'}</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-label">Question ID:</div>
+                                    <div class="result-value">${market.questionID || 'N/A'}</div>
+                                </div>
+                                ${tokenIds.length >= 2 ? `
+                                    <div class="result-item">
+                                        <div class="result-label">Token ID (Yes):</div>
+                                        <div class="result-value">${tokenIds[0]}</div>
+                                    </div>
+                                    <div class="result-item">
+                                        <div class="result-label">Token ID (No):</div>
+                                        <div class="result-value">${tokenIds[1]}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            document.getElementById('results').innerHTML = html;
+            document.getElementById('results').classList.add('show');
+        }
+
+        function displayMarketInfo(market) {
+            const tokenIds = JSON.parse(market.clobTokenIds || '[]');
+            const outcomes = JSON.parse(market.outcomes || '[]');
+            const prices = JSON.parse(market.outcomePrices || '[]');
+            const events = market.events || [];
+
+            let html = `
+                <div class="result-section">
+                    <h3>Market Information</h3>
+                    <div class="result-item">
+                        <div class="result-label">Market ID:</div>
+                        <div class="result-value">${market.id || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Market Slug:</div>
+                        <div class="result-value">${market.slug || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Question:</div>
+                        <div class="result-value">${market.question || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Condition ID:</div>
+                        <div class="result-value">${market.conditionId || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Question ID:</div>
+                        <div class="result-value">${market.questionID || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">NegRisk Market ID:</div>
+                        <div class="result-value">${market.negRiskMarketID || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Is NegRisk:</div>
+                        <div class="result-value">${market.negRisk || false}</div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <h3>Token IDs</h3>
+                    ${tokenIds.length >= 2 ? `
+                        <div class="result-item">
+                            <div class="result-label">Token ID (Yes):</div>
+                            <div class="result-value">${tokenIds[0]}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Token ID (No):</div>
+                            <div class="result-value">${tokenIds[1]}</div>
+                        </div>
+                    ` : '<p>No token IDs available</p>'}
+                </div>
+
+                <div class="result-section">
+                    <h3>Market Status</h3>
+                    <div class="result-item">
+                        <div class="result-label">Active:</div>
+                        <div class="result-value">${market.active || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Closed:</div>
+                        <div class="result-value">${market.closed || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Archived:</div>
+                        <div class="result-value">${market.archived || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Start Date:</div>
+                        <div class="result-value">${market.startDate || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">End Date:</div>
+                        <div class="result-value">${market.endDate || 'N/A'}</div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <h3>Market Metrics</h3>
+                    <div class="result-item">
+                        <div class="result-label">Volume:</div>
+                        <div class="result-value">$${market.volume || 'N/A'}</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Liquidity:</div>
+                        <div class="result-value">$${market.liquidity || 'N/A'}</div>
+                    </div>
+                    ${outcomes.length >= 2 && prices.length >= 2 ? `
+                        <div class="result-item">
+                            <div class="result-label">${outcomes[0]} Price:</div>
+                            <div class="result-value">${prices[0]}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">${outcomes[1]} Price:</div>
+                            <div class="result-value">${prices[1]}</div>
+                        </div>
+                    ` : ''}
+                </div>
+
+                ${events.length > 0 ? `
+                    <div class="result-section">
+                        <h3>Associated Event</h3>
+                        <div class="result-item">
+                            <div class="result-label">Event ID:</div>
+                            <div class="result-value">${events[0].id || 'N/A'}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Event Slug:</div>
+                            <div class="result-value">${events[0].slug || 'N/A'}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Event Title:</div>
+                            <div class="result-value">${events[0].title || 'N/A'}</div>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('results').innerHTML = html;
+            document.getElementById('results').classList.add('show');
+        }
+
+        // Lookup functions
+        async function lookupEventSlug() {
+            const slug = document.getElementById('event-slug-input').value.trim();
+            if (!slug) {
+                showError('Please enter an event slug');
+                return;
+            }
+
+            showLoading();
+            try {
+                const event = await fetchEventBySlug(slug);
+                if (!event) {
+                    showError('Event not found');
+                    return;
+                }
+                displayEventInfo(event);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function lookupEventId() {
+            const id = document.getElementById('event-id-input').value.trim();
+            if (!id) {
+                showError('Please enter an event ID');
+                return;
+            }
+
+            showLoading();
+            try {
+                const event = await fetchEventById(id);
+                if (!event) {
+                    showError('Event not found');
+                    return;
+                }
+                displayEventInfo(event);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function lookupMarketSlug() {
+            const slug = document.getElementById('market-slug-input').value.trim();
+            if (!slug) {
+                showError('Please enter a market slug');
+                return;
+            }
+
+            showLoading();
+            try {
+                const market = await fetchMarketBySlug(slug);
+                if (!market) {
+                    showError('Market not found');
+                    return;
+                }
+                displayMarketInfo(market);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function lookupMarketId() {
+            const id = document.getElementById('market-id-input').value.trim();
+            if (!id) {
+                showError('Please enter a market ID');
+                return;
+            }
+
+            showLoading();
+            try {
+                const market = await fetchMarketById(id);
+                if (!market) {
+                    showError('Market not found');
+                    return;
+                }
+                displayMarketInfo(market);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function lookupQuestionId() {
+            const id = document.getElementById('question-id-input').value.trim();
+            if (!id) {
+                showError('Please enter a question ID');
+                return;
+            }
+
+            showLoading();
+            try {
+                const market = await fetchMarketByQuestionId(id);
+                if (!market) {
+                    showError('Market not found');
+                    return;
+                }
+                displayMarketInfo(market);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function lookupConditionId() {
+            const id = document.getElementById('condition-id-input').value.trim();
+            if (!id) {
+                showError('Please enter a condition ID');
+                return;
+            }
+
+            showLoading();
+            try {
+                const market = await fetchMarketByConditionId(id);
+                if (!market) {
+                    showError('Market not found');
+                    return;
+                }
+                displayMarketInfo(market);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function lookupTokenId() {
+            const id = document.getElementById('token-id-input').value.trim();
+            if (!id) {
+                showError('Please enter a token ID');
+                return;
+            }
+
+            showLoading();
+            try {
+                const market = await fetchMarketByTokenId(id);
+                if (!market) {
+                    showError('Market not found');
+                    return;
+                }
+                displayMarketInfo(market);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // Allow Enter key to trigger search
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const button = input.parentElement.parentElement.querySelector('.btn');
+                    button.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
