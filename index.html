@@ -341,10 +341,95 @@
 
     <script>
         const BASE_URL = 'https://gamma-api.polymarket.com';
+        const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
         // Use AllOrigins CORS proxy for GitHub Pages
         function proxyUrl(url) {
             return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+        }
+
+        // Cache management
+        function getCacheKey(url) {
+            return 'polymarket_cache_' + btoa(url).substring(0, 50);
+        }
+
+        function getCachedData(url) {
+            try {
+                const cacheKey = getCacheKey(url);
+                const cached = localStorage.getItem(cacheKey);
+                if (!cached) return null;
+
+                const { data, timestamp } = JSON.parse(cached);
+                const now = Date.now();
+
+                // Check if cache is still valid (within 1 hour)
+                if (now - timestamp < CACHE_DURATION) {
+                    console.log('Cache hit for:', url);
+                    return data;
+                }
+
+                // Cache expired, remove it
+                localStorage.removeItem(cacheKey);
+                return null;
+            } catch (e) {
+                console.error('Cache read error:', e);
+                return null;
+            }
+        }
+
+        function setCachedData(url, data) {
+            try {
+                const cacheKey = getCacheKey(url);
+                const cacheEntry = {
+                    data: data,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+                console.log('Cached data for:', url);
+            } catch (e) {
+                console.error('Cache write error:', e);
+                // If localStorage is full, clear old cache entries
+                if (e.name === 'QuotaExceededError') {
+                    clearOldCache();
+                    // Try again
+                    try {
+                        localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+                    } catch (e2) {
+                        console.error('Still cannot cache:', e2);
+                    }
+                }
+            }
+        }
+
+        function clearOldCache() {
+            const keys = Object.keys(localStorage);
+            const cacheKeys = keys.filter(key => key.startsWith('polymarket_cache_'));
+
+            // Remove oldest 50% of cache entries
+            const entriesToRemove = Math.ceil(cacheKeys.length / 2);
+            for (let i = 0; i < entriesToRemove; i++) {
+                localStorage.removeItem(cacheKeys[i]);
+            }
+            console.log(`Cleared ${entriesToRemove} old cache entries`);
+        }
+
+        // Cached fetch wrapper
+        async function cachedFetch(url) {
+            // Check cache first
+            const cached = getCachedData(url);
+            if (cached !== null) {
+                return cached;
+            }
+
+            // Not in cache, fetch from API
+            const response = await fetch(proxyUrl(url));
+            if (!response.ok) throw new Error('Failed to fetch data');
+            const data = await response.json();
+
+            // Store in cache
+            setCachedData(url, data);
+
+            return data;
         }
 
         // Tab switching
@@ -365,65 +450,52 @@
             });
         });
 
-        // API fetch functions
+        // API fetch functions (with caching)
         async function fetchEventBySlug(slug) {
             const url = `${BASE_URL}/events?slug=${slug}`;
-            const response = await fetch(proxyUrl(url));
-            if (!response.ok) throw new Error('Failed to fetch event');
-            const data = await response.json();
+            const data = await cachedFetch(url);
             return data.length > 0 ? data[0] : null;
         }
 
         async function fetchEventById(id) {
             const url = `${BASE_URL}/events/${id}`;
-            const response = await fetch(proxyUrl(url));
-            if (!response.ok) throw new Error('Failed to fetch event');
-            return await response.json();
+            return await cachedFetch(url);
         }
 
         async function fetchMarketBySlug(slug) {
             const url = `${BASE_URL}/markets?slug=${slug}`;
-            const response = await fetch(proxyUrl(url));
-            if (!response.ok) throw new Error('Failed to fetch market');
-            const data = await response.json();
+            const data = await cachedFetch(url);
             return data.length > 0 ? data[0] : null;
         }
 
         async function fetchMarketById(id) {
             const url = `${BASE_URL}/markets/${id}`;
-            const response = await fetch(proxyUrl(url));
-            if (!response.ok) throw new Error('Failed to fetch market');
-            return await response.json();
+            return await cachedFetch(url);
         }
 
         async function fetchMarketByQuestionId(id) {
             const url = `${BASE_URL}/markets?question_ids=${id}`;
-            const response = await fetch(proxyUrl(url));
-            if (!response.ok) throw new Error('Failed to fetch market');
-            const data = await response.json();
+            const data = await cachedFetch(url);
             return data.length > 0 ? data[0] : null;
         }
 
         async function fetchMarketByConditionId(id) {
             const url = `${BASE_URL}/markets?condition_ids=${id}`;
-            const response = await fetch(proxyUrl(url));
-            if (!response.ok) throw new Error('Failed to fetch market');
-            const data = await response.json();
+            const data = await cachedFetch(url);
             return data.length > 0 ? data[0] : null;
         }
 
         async function fetchMarketByTokenId(id) {
             const url = `${BASE_URL}/markets?clob_token_ids=${id}`;
-            const response = await fetch(proxyUrl(url));
-            if (!response.ok) throw new Error('Failed to fetch market');
-            const data = await response.json();
+            const data = await cachedFetch(url);
             return data.length > 0 ? data[0] : null;
         }
 
         // Display functions
-        function showLoading() {
+        function showLoading(fromCache = false) {
             const results = document.getElementById('results');
-            results.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading...</p></div>';
+            const message = fromCache ? 'Loading from cache...' : 'Loading...';
+            results.innerHTML = `<div class="loading"><div class="spinner"></div><p>${message}</p></div>`;
             results.classList.add('show');
         }
 
