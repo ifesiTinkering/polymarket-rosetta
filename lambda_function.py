@@ -37,8 +37,14 @@ def lambda_handler(event, context):
         base_url = 'https://gamma-api.polymarket.com'
         url = f"{base_url}{path}"
 
-        # Fetch from Polymarket API
-        req = urllib.request.Request(url)
+        # Fetch from Polymarket API with proper headers
+        req = urllib.request.Request(
+            url,
+            headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+                'Accept': 'application/json'
+            }
+        )
         with urllib.request.urlopen(req, timeout=10) as response:
             data = response.read()
 
