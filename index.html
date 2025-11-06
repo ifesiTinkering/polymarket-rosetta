@@ -260,8 +260,8 @@
                 <button class="tab" data-tab="event-id">Event ID</button>
                 <button class="tab" data-tab="market-slug">Market Slug</button>
                 <button class="tab" data-tab="market-id">Market ID</button>
-                <button class="tab" data-tab="question-id">Question ID</button>
                 <button class="tab" data-tab="condition-id">Condition ID</button>
+                <button class="tab" data-tab="question-id">Question ID</button>
                 <button class="tab" data-tab="token-id">Token ID</button>
             </div>
 
@@ -305,16 +305,6 @@
                 <button class="btn" onclick="lookupMarketId()">Lookup</button>
             </div>
 
-            <!-- Question ID -->
-            <div class="tab-content" data-content="question-id">
-                <div class="input-group">
-                    <label>Question ID</label>
-                    <input type="text" id="question-id-input" placeholder="e.g., 0x5ddb6cc9...">
-                    <div class="example">Example: 0x5ddb6cc9bcce2d9d810ef66a6ee394f91ecf28b7caa4e405036af1916b26e805</div>
-                </div>
-                <button class="btn" onclick="lookupQuestionId()">Lookup</button>
-            </div>
-
             <!-- Condition ID -->
             <div class="tab-content" data-content="condition-id">
                 <div class="input-group">
@@ -323,6 +313,16 @@
                     <div class="example">Example: 0x201df9b6a68bab220392ca4cd18cf4d8c96b7612568777626292d2fb08954efe</div>
                 </div>
                 <button class="btn" onclick="lookupConditionId()">Lookup</button>
+            </div>
+
+            <!-- Question ID -->
+            <div class="tab-content" data-content="question-id">
+                <div class="input-group">
+                    <label>Question ID</label>
+                    <input type="text" id="question-id-input" placeholder="e.g., 0x5ddb6cc9...">
+                    <div class="example">Example: 0x5ddb6cc9bcce2d9d810ef66a6ee394f91ecf28b7caa4e405036af1916b26e805</div>
+                </div>
+                <button class="btn" onclick="lookupQuestionId()">Lookup</button>
             </div>
 
             <!-- Token ID -->
