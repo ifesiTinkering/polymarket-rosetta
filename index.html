@@ -342,11 +342,31 @@
     <script>
         const BASE_URL = 'https://gamma-api.polymarket.com';
         const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
+        const CACHE_VERSION = 'v2'; // Increment to invalidate all old cache
 
         // Use AllOrigins CORS proxy for GitHub Pages
         function proxyUrl(url) {
             return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
         }
+
+        // Check and clear old cache versions
+        function initCache() {
+            const storedVersion = localStorage.getItem('polymarket_cache_version');
+            if (storedVersion !== CACHE_VERSION) {
+                console.log('Cache version mismatch, clearing old cache...');
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => {
+                    if (key.startsWith('polymarket_cache_')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                localStorage.setItem('polymarket_cache_version', CACHE_VERSION);
+                console.log('Cache cleared and updated to', CACHE_VERSION);
+            }
+        }
+
+        // Initialize cache on page load
+        initCache();
 
         // Cache management
         function getCacheKey(url) {
