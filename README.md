@@ -118,11 +118,12 @@ GET /markets?clob_token_ids={id}  # Market by Token ID
 User Input → JavaScript → CORS Proxy → Polymarket API → Parse Response → Display
 ```
 
-## Performance Improvements
+## Performance
 
 ### Current Performance
-- Initial lookups: 2-4 seconds (due to CORS proxy)
-- Repeat lookups: 2-4 seconds (no caching currently)
+- **First-time lookups:** 2-4 seconds (due to CORS proxy)
+- **Repeat lookups:** Instant! (cached in browser for 1 hour)
+- **Cache storage:** Browser localStorage (automatic cleanup when full)
 
 ### Recommended Improvements
 
@@ -184,13 +185,13 @@ Deploy a simple AWS Lambda function to proxy API requests directly, eliminating 
 
 **Estimated Setup Time:** 15-20 minutes
 
-**Option 2: Client-Side Caching**
+**Option 2: Client-Side Caching** ✅ **IMPLEMENTED**
 
-Add localStorage caching for instant repeat lookups:
-```javascript
-// Cache results for 1 hour
-// Instant response for repeated queries
-```
+Already implemented! The app now caches all API responses in browser localStorage for 1 hour. Features:
+- Instant repeat lookups (no API call needed)
+- Automatic cache expiration after 1 hour
+- Smart cache cleanup when storage is full
+- Cache hit/miss logging in browser console
 
 **Option 3: CloudFront CDN**
 
@@ -306,12 +307,14 @@ polymarket-rosetta/
 Contributions welcome! This tool is designed to help the Polymarket developer community.
 
 ### Ideas for Contribution
-- Add caching for faster repeat lookups
+- ~~Add caching for faster repeat lookups~~ ✅ Done!
 - Create AWS Lambda backend for better performance
 - Add export functionality (CSV, JSON)
 - Add batch lookup capability
+- Add cache clearing button
 - Improve error handling
 - Add mini definitions for each ID type
+- Add "copy to clipboard" buttons for IDs
 
 ## Glossary
 
