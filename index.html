@@ -342,11 +342,13 @@
     <script>
         const BASE_URL = 'https://gamma-api.polymarket.com';
         const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
-        const CACHE_VERSION = 'v2'; // Increment to invalidate all old cache
+        const CACHE_VERSION = 'v3'; // Increment to invalidate all old cache
+        const LAMBDA_URL = 'https://qkfg4pyzi2.execute-api.us-east-1.amazonaws.com/default/polymarket-proxy';
 
-        // Use AllOrigins CORS proxy for GitHub Pages
+        // Use AWS Lambda to proxy API requests (fast and reliable!)
         function proxyUrl(url) {
-            return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            const path = url.replace(BASE_URL, '');
+            return `${LAMBDA_URL}?path=${encodeURIComponent(path)}`;
         }
 
         // Check and clear old cache versions
