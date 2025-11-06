@@ -198,6 +198,23 @@
             padding: 15px;
             border-radius: 8px;
             margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .error code {
+            background: #fca5a5;
+            color: #7f1d1d;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            word-break: break-all;
+        }
+
+        .error small {
+            display: block;
+            margin-top: 10px;
+            opacity: 0.9;
+            line-height: 1.5;
         }
 
         .loading {
@@ -342,7 +359,7 @@
     <script>
         const BASE_URL = 'https://gamma-api.polymarket.com';
         const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
-        const CACHE_VERSION = 'v5_fixed_hash'; // Increment to invalidate all old cache
+        const CACHE_VERSION = 'v6_better_errors'; // Increment to invalidate all old cache
         const LAMBDA_URL = 'https://qkfg4pyzi2.execute-api.us-east-1.amazonaws.com/default/polymarket-proxy';
 
         // Use AWS Lambda to proxy API requests (fast and reliable!)
@@ -744,7 +761,7 @@
             try {
                 const event = await fetchEventBySlug(slug);
                 if (!event) {
-                    showError('Event not found');
+                    showError('Event not found with this slug.<br><br><small>Valid event slug example: <code>new-york-city-mayoral-election</code></small>');
                     return;
                 }
                 displayEventInfo(event);
@@ -764,7 +781,7 @@
             try {
                 const event = await fetchEventById(id);
                 if (!event) {
-                    showError('Event not found');
+                    showError('Event not found with this ID.<br><br><small>Valid event ID example: <code>23246</code></small>');
                     return;
                 }
                 displayEventInfo(event);
@@ -784,7 +801,7 @@
             try {
                 const market = await fetchMarketBySlug(slug);
                 if (!market) {
-                    showError('Market not found');
+                    showError('Market not found with this slug.<br><br><small>Valid market slug example: <code>will-eric-adams-win-the-2025-nyc-mayoral-election</code></small>');
                     return;
                 }
                 displayMarketInfo(market);
@@ -804,7 +821,7 @@
             try {
                 const market = await fetchMarketById(id);
                 if (!market) {
-                    showError('Market not found');
+                    showError('Market not found with this ID.<br><br><small>Valid market ID example: <code>538928</code></small>');
                     return;
                 }
                 displayMarketInfo(market);
@@ -824,7 +841,7 @@
             try {
                 const market = await fetchMarketByQuestionId(id);
                 if (!market) {
-                    showError('Market not found');
+                    showError('Market not found with this question ID.<br><br><small>Valid question ID example: <code>0x289dc66d9938b32cb340a630d13de0a91e3e04e0dc62a219a26a16e6f9cc2600</code><br>Question IDs are 66-character hexadecimal strings starting with 0x.</small>');
                     return;
                 }
                 displayMarketInfo(market);
@@ -844,7 +861,7 @@
             try {
                 const market = await fetchMarketByConditionId(id);
                 if (!market) {
-                    showError('Market not found');
+                    showError('Market not found with this condition ID.<br><br><small>Valid condition ID example: <code>0x846ce700a217ec7b75b8d078450f7e88eb5f44c76c12ae448ca10039ef4412b9</code><br>Condition IDs are 66-character hexadecimal strings starting with 0x.</small>');
                     return;
                 }
                 displayMarketInfo(market);
@@ -864,7 +881,7 @@
             try {
                 const market = await fetchMarketByTokenId(id);
                 if (!market) {
-                    showError('Market not found');
+                    showError('Market not found with this token ID.<br><br><small>Valid token ID example: <code>12541509255877010177934715422358422748052378132651567836811989084820478865881</code><br>Token IDs are long numeric strings (77+ digits).</small>');
                     return;
                 }
                 displayMarketInfo(market);
