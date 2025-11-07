@@ -787,7 +787,7 @@
                 }
                 displayEventInfo(event);
             } catch (error) {
-                showError(error.message);
+                showError('Event not found with this ID.<br><br><small>Valid event ID example: <code>23246</code><br>Event IDs are numeric identifiers.</small>');
             }
         }
 
@@ -827,7 +827,7 @@
                 }
                 displayMarketInfo(market);
             } catch (error) {
-                showError(error.message);
+                showError('Market not found with this ID.<br><br><small>Valid market ID example: <code>538928</code><br>Market IDs are numeric identifiers.</small>');
             }
         }
 
