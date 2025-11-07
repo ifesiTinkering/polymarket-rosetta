@@ -782,7 +782,7 @@
             try {
                 const event = await fetchEventById(id);
                 if (!event) {
-                    showError('Event not found with this ID.<br><br><small>Valid event ID example: <code>23246</code></small>');
+                    showError('Event not found with this ID.<br><br><small>Valid event ID example: <code>23246</code><br>Event IDs are numeric identifiers.</small>');
                     return;
                 }
                 displayEventInfo(event);
@@ -822,7 +822,7 @@
             try {
                 const market = await fetchMarketById(id);
                 if (!market) {
-                    showError('Market not found with this ID.<br><br><small>Valid market ID example: <code>538928</code></small>');
+                    showError('Market not found with this ID.<br><br><small>Valid market ID example: <code>538928</code><br>Market IDs are numeric identifiers.</small>');
                     return;
                 }
                 displayMarketInfo(market);
